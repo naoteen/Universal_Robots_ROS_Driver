@@ -85,7 +85,7 @@ This repository contains the new **ur_robot_driver** and a couple of helper pack
 
 ## Requirements
 This driver requires a system setup with ROS. It is recommended to use **Ubuntu 18.04 with ROS
-melodic**, however using Ubuntu 16.04 with ROS kinetic should also work.
+melodic**, however using Ubuntu 16.04 or 20.4 also work.
 
 To make sure that robot control isn't affected by system latencies, it is highly recommended to use
 a real-time kernel with the system. See the [real-time setup guide](ur_robot_driver/doc/real_time.md)
@@ -94,17 +94,11 @@ on information how to set this up.
 ## Building
 
 ```bash
-# source global ros
-$ source /opt/ros/<your_ros_version>/setup.bash
-
-# create a catkin workspace
-$ mkdir -p catkin_ws/src && cd catkin_ws
-
 # clone the driver
-$ git clone https://github.com/UniversalRobots/Universal_Robots_ROS_Driver.git src/Universal_Robots_ROS_Driver
+$ git clone https://github.com/naoteen/Universal_Robots_ROS_Driver.git
 
-# clone fork of the description to use the calibration feature
-$ git clone -b calibration_devel https://github.com/fmauch/universal_robot.git src/fmauch_universal_robot
+# clone fork of ros-industrial/universal_robot
+$ git clone https://github.com/naoteen/universal_robot.git
 
 # install dependencies
 $ sudo apt update -qq
@@ -114,8 +108,9 @@ $ rosdep install --from-paths src --ignore-src -y
 # build the workspace
 $ catkin_make
 
-# activate the workspace (ie: source it)
-$ source devel/setup.bash
+# if there are anything to need
+$ sudo apt install ros-noetic-moveit
+$ sudo apt install ros-noetic-*controller*
 ```
 
 ## Setting up a UR robot for ur_robot_driver
@@ -164,14 +159,14 @@ calibration](#extract-calibration-information) first.)
 
 To actually start the robot driver use one of the existing launch files
 
-    $ roslaunch ur_robot_driver <robot_type>_bringup.launch robot_ip:=192.168.56.101
+    $ roslaunch ur_robot_driver <robot_type>_bringup.launch robot_ip:=192.168.11.0
 
 where **<robot_type>** is one of *ur3, ur5, ur10, ur3e, ur5e, ur10e*. Note that in this example we
 load the calibration parameters for the robot "ur10_example".
 
 If you calibrated your robot before, pass that calibration to the launch file:
 
-    $ roslaunch ur_robot_driver <robot_type>_bringup.launch robot_ip:=192.168.56.101 \
+    $ roslaunch ur_robot_driver <robot_type>_bringup.launch robot_ip:=192.168.11.0 \
       kinematics_config:=$(rospack find ur_calibration)/etc/ur10_example_calibration.yaml
 
 If the parameters in that file don't match the ones reported from the robot, the driver will output
