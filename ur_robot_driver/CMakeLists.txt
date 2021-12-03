@@ -15,56 +15,44 @@ find_package(catkin REQUIRED
     controller_manager
     geometry_msgs
     hardware_interface
-    industrial_robot_status_interface
     pluginlib
     roscpp
-    scaled_joint_trajectory_controller
     sensor_msgs
-    speed_scaling_interface
-    speed_scaling_state_controller
     std_srvs
     tf
     tf2_geometry_msgs
     tf2_msgs
     trajectory_msgs
+    ur_controllers
     ur_dashboard_msgs
     ur_msgs
-    pass_through_controllers
-    kdl_parser
 )
 find_package(Boost REQUIRED)
-find_package(ur_client_library REQUIRED)
 
 catkin_package(
   INCLUDE_DIRS
     include
   LIBRARIES
-    ur_robot_driver_plugin
-    urcl_log_handler
+    ur_robot_driver
   CATKIN_DEPENDS
     actionlib
-    controller_manager
     control_msgs
+    controller_manager
     geometry_msgs
     hardware_interface
-    kdl_parser
-    pass_through_controllers
     pluginlib
     roscpp
-    scaled_joint_trajectory_controller
     sensor_msgs
-    speed_scaling_interface
-    speed_scaling_state_controller
-    std_srvs
     tf
     tf2_geometry_msgs
     tf2_msgs
     trajectory_msgs
+    ur_controllers
     ur_dashboard_msgs
     ur_msgs
+    std_srvs
   DEPENDS
     Boost
-    ur_client_library
 )
 
 # check c++11 / c++0x
@@ -90,57 +78,76 @@ include_directories(
   ${Boost_INCLUDE_DIRS}
 )
 
-add_library(ur_robot_driver_plugin
-  src/dashboard_client_ros.cpp
-  src/hardware_interface.cpp
+add_library(ur_robot_driver
+    src/comm/tcp_socket.cpp
+    src/comm/server.cpp
+    #src/ros/service_stopper.cpp
+    #src/ur/commander.cpp
+    #src/ur/master_board.cpp
+    #src/ur/messages.cpp
+    #src/ur/robot_mode.cpp
+    src/primary/primary_package.cpp
+    src/primary/robot_message.cpp
+    src/primary/robot_message/version_message.cpp
+    src/primary/robot_state/kinematics_info.cpp
+    src/rtde/control_package_pause.cpp
+    src/rtde/control_package_setup_inputs.cpp
+    src/rtde/control_package_setup_outputs.cpp
+    src/rtde/control_package_start.cpp
+    src/rtde/data_package.cpp
+    src/rtde/get_urcontrol_version.cpp
+    src/rtde/request_protocol_version.cpp
+    src/rtde/rtde_package.cpp
+    src/rtde/text_message.cpp
+    src/rtde/rtde_client.cpp
+    src/ur/ur_driver.cpp
+    src/ur/calibration_checker.cpp
+    src/ur/dashboard_client.cpp
+    src/ur/tool_communication.cpp
+    src/rtde/rtde_writer.cpp
 )
-target_link_libraries(ur_robot_driver_plugin ur_client_library::urcl ${catkin_LIBRARIES})
+target_link_libraries(ur_robot_driver ${catkin_LIBRARIES})
+add_dependencies(ur_robot_driver ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+
+add_library(ur_robot_driver_plugin
+  src/ros/dashboard_client_ros.cpp
+  src/ros/hardware_interface.cpp
+)
+target_link_libraries(ur_robot_driver_plugin ur_robot_driver ${catkin_LIBRARIES})
 add_dependencies(ur_robot_driver_plugin ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
-add_library(urcl_log_handler
-  src/urcl_log_handler.cpp
-)
-target_link_libraries(urcl_log_handler ${catkin_LIBRARIES} ur_client_library::urcl)
-
 add_executable(ur_robot_driver_node
-  src/dashboard_client_ros.cpp
-  src/hardware_interface.cpp
-  src/hardware_interface_node.cpp
+  src/ros/dashboard_client_ros.cpp
+  src/ros/hardware_interface.cpp
+  src/ros/hardware_interface_node.cpp
 )
-target_link_libraries(ur_robot_driver_node ${catkin_LIBRARIES} ur_client_library::urcl urcl_log_handler)
+target_link_libraries(ur_robot_driver_node ${catkin_LIBRARIES} ur_robot_driver)
 add_dependencies(ur_robot_driver_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
 add_executable(dashboard_client
-  src/dashboard_client_ros.cpp
-  src/dashboard_client_node.cpp
+  src/ros/dashboard_client_ros.cpp
+  src/ros/dashboard_client_node.cpp
 )
-target_link_libraries(dashboard_client ${catkin_LIBRARIES} ur_client_library::urcl urcl_log_handler)
+target_link_libraries(dashboard_client ${catkin_LIBRARIES} ur_robot_driver)
 add_dependencies(dashboard_client ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
 add_executable(robot_state_helper
-  src/robot_state_helper.cpp
-  src/robot_state_helper_node.cpp
+  src/ros/robot_state_helper.cpp
+  src/ros/robot_state_helper_node.cpp
 )
-target_link_libraries(robot_state_helper ${catkin_LIBRARIES} ur_client_library::urcl)
+target_link_libraries(robot_state_helper ${catkin_LIBRARIES} ur_robot_driver)
 add_dependencies(robot_state_helper ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
-if(CATKIN_ENABLE_TESTING)
-  find_package(rostest REQUIRED)
-
-  add_rostest(test/driver.test)
-endif()
-
-
-install(TARGETS ur_robot_driver_plugin urcl_log_handler ur_robot_driver_node robot_state_helper dashboard_client
+install(TARGETS ur_robot_driver ur_robot_driver_node robot_state_helper dashboard_client
   ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
 
-catkin_install_python(PROGRAMS scripts/tool_communication scripts/test_move
+install(PROGRAMS scripts/tool_communication
   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
 
-install(DIRECTORY config launch resources
+install(DIRECTORY config launch
   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION})
 
 

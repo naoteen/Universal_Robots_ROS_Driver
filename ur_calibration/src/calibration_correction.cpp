@@ -2,7 +2,6 @@
 
 // -- BEGIN LICENSE BLOCK ----------------------------------------------
 // Copyright 2019 FZI Forschungszentrum Informatik
-// Created on behalf of Universal Robots A/S
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -28,14 +27,12 @@
 
 #include <ur_calibration/calibration_consumer.h>
 
-#include <ur_client_library/comm/parser.h>
-#include <ur_client_library/comm/pipeline.h>
-#include <ur_client_library/comm/producer.h>
-#include <ur_client_library/comm/stream.h>
-#include <ur_client_library/primary/package_header.h>
-#include <ur_client_library/primary/primary_parser.h>
-
-#include <ur_robot_driver/urcl_log_handler.h>
+#include <ur_robot_driver/comm/parser.h>
+#include <ur_robot_driver/comm/pipeline.h>
+#include <ur_robot_driver/comm/producer.h>
+#include <ur_robot_driver/comm/stream.h>
+#include <ur_robot_driver/primary/package_header.h>
+#include <ur_robot_driver/primary/primary_parser.h>
 
 #include <sensor_msgs/JointState.h>
 #include <tf/transform_listener.h>
@@ -45,7 +42,7 @@
 
 namespace fs = boost::filesystem;
 
-using namespace urcl;
+using namespace ur_driver;
 using namespace primary_interface;
 using namespace ur_calibration;
 
@@ -83,14 +80,14 @@ public:
 
   void run()
   {
-    comm::URStream<PrimaryPackage> stream(robot_ip_, UR_PRIMARY_PORT);
+    comm::URStream<PackageHeader> stream(robot_ip_, UR_PRIMARY_PORT);
     primary_interface::PrimaryParser parser;
-    comm::URProducer<PrimaryPackage> prod(stream, parser);
+    comm::URProducer<PackageHeader> prod(stream, parser);
     CalibrationConsumer consumer;
 
     comm::INotifier notifier;
 
-    comm::Pipeline<PrimaryPackage> pipeline(prod, &consumer, "Pipeline", notifier);
+    comm::Pipeline<PackageHeader> pipeline(prod, consumer, "Pipeline", notifier);
     pipeline.run();
     while (!consumer.isCalibrated())
     {
@@ -164,8 +161,6 @@ int main(int argc, char* argv[])
 {
   ros::init(argc, argv, "ur_calibration");
   ros::NodeHandle nh("~");
-
-  ur_driver::registerUrclLogHandler();
 
   try
   {

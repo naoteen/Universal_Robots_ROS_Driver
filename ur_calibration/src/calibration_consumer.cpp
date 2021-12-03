@@ -2,7 +2,6 @@
 
 // -- BEGIN LICENSE BLOCK ----------------------------------------------
 // Copyright 2019 FZI Forschungszentrum Informatik
-// Created on behalf of Universal Robots A/S
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -34,12 +33,13 @@ CalibrationConsumer::CalibrationConsumer() : calibrated_(false)
 {
 }
 
-bool CalibrationConsumer::consume(std::shared_ptr<urcl::primary_interface::PrimaryPackage> product)
+bool CalibrationConsumer::consume(
+    std::shared_ptr<ur_driver::comm::URPackage<ur_driver::primary_interface::PackageHeader>> product)
 {
-  auto kin_info = std::dynamic_pointer_cast<urcl::primary_interface::KinematicsInfo>(product);
+  auto kin_info = std::dynamic_pointer_cast<ur_driver::primary_interface::KinematicsInfo>(product);
   if (kin_info != nullptr)
   {
-    ROS_INFO("%s", product->toString().c_str());
+    LOG_INFO("%s", product->toString().c_str());
     DHRobot my_robot;
     for (size_t i = 0; i < kin_info->dh_a_.size(); ++i)
     {

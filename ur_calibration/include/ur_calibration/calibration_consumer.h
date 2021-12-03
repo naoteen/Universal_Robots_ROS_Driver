@@ -2,7 +2,6 @@
 
 // -- BEGIN LICENSE BLOCK ----------------------------------------------
 // Copyright 2019 FZI Forschungszentrum Informatik
-// Created on behalf of Universal Robots A/S
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -28,21 +27,23 @@
 
 #ifndef UR_CALIBRATION_CALIBRATION_CONSUMER_H_INCLUDED
 #define UR_CALIBRATION_CALIBRATION_CONSUMER_H_INCLUDED
-#include <ur_client_library/comm/pipeline.h>
+#include <ur_robot_driver/comm/pipeline.h>
 
-#include <ur_client_library/primary/robot_state/kinematics_info.h>
+#include <ur_robot_driver/primary/robot_state/kinematics_info.h>
 
 #include <ur_calibration/calibration.h>
 
 namespace ur_calibration
 {
-class CalibrationConsumer : public urcl::comm::IConsumer<urcl::primary_interface::PrimaryPackage>
+class CalibrationConsumer
+  : public ur_driver::comm::IConsumer<ur_driver::comm::URPackage<ur_driver::primary_interface::PackageHeader>>
 {
 public:
   CalibrationConsumer();
   virtual ~CalibrationConsumer() = default;
 
-  virtual bool consume(std::shared_ptr<urcl::primary_interface::PrimaryPackage> product);
+  virtual bool
+  consume(std::shared_ptr<ur_driver::comm::URPackage<ur_driver::primary_interface::PackageHeader>> product);
 
   bool isCalibrated() const
   {

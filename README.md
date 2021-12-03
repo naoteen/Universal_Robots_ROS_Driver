@@ -1,21 +1,16 @@
-[![Build badge](https://github.com/UniversalRobots/Universal_Robots_ROS_Driver/workflows/Industrial%20CI%20pipeline/badge.svg?branch=master&event=push)](https://github.com/UniversalRobots/Universal_Robots_ROS_Driver/actions)
+[![Build badge](https://github.com/UniversalRobots/Universal_Robots_ROS_Driver/workflows/Industrial%20CI%20pipeline/badge.svg?branch=master)](https://github.com/UniversalRobots/Universal_Robots_ROS_Driver/actions)
 
 # Universal_Robots_ROS_Driver
 Universal Robots have become a dominant supplier of lightweight, robotic manipulators for industry, as well as for scientific research and education. The Robot Operating System (ROS) has developed from a community-centered movement to a mature framework and quasi standard, providing a rich set of powerful tools for robot engineers and researchers, working in many different domains.
 
-<center><img src="ur_robot_driver/doc/initial_setup_images/e-Series.jpg" alt="Universal Robot e-Series family" style="width: 80%;"/></center>
+<center><img src="ur_robot_driver/doc/initial_setup_images/e-Series.png" alt="Universal Robot e-Series family" style="width: 45%;"/></center>
 
 With the release of UR’s new e-Series, the demand for a ROS driver that supports the new manipulators and the newest ROS releases and paradigms like ROS-control has increased further. The goal of this driver is to provide a stable and sustainable interface between UR robots and ROS that strongly benefit all parties.
 
 It is the core value of Universal Robots, to empower people to achieve any goal within automation. The success criteria of this driver release is to follow this vision, by providing the ROS community with an easy to use, stable and powerful driver, that empowers the community to reach their goals in research and automation without struggling with unimportant technical challenges, instability or lacking features.
 
-## Acknowledgment
+## Acknowledgement
 This driver is forked from the [ur_modern_driver](https://github.com/ros-industrial/ur_modern_driver).
-
-Developed in collaboration between:
-
-[<img height="60" alt="Universal Robots A/S" src="ur_robot_driver/doc/resources/ur_logo.jpg">](https://www.universal-robots.com/) &nbsp; and &nbsp;
-[<img height="60" alt="FZI Research Center for Information Technology" src="ur_robot_driver/doc/resources/fzi-logo_transparenz.png">](https://www.fzi.de).
 
 <!-- 
     ROSIN acknowledgement from the ROSIN press kit
@@ -35,6 +30,9 @@ More information: <a href="http://rosin-project.eu">rosin-project.eu</a>
 
 This project has received funding from the European Union’s Horizon 2020  
 research and innovation programme under grant agreement no. 732287. 
+
+It was developed in collaboration between [Universal Robots](https://www.universal-robots.com/) and
+the [FZI Research Center for Information Technology](https://www.fzi.de).
 
 
 ## How to report an issue
@@ -70,13 +68,6 @@ If you need help using this driver, please see the ROS-category in the [UR+ Deve
    recovery from safety events can be done using ROS service- and action calls. See the driver's
    [dashboard services](ur_robot_driver/doc/ROS_INTERFACE.md#ur_robot_driver_node) and the
    [robot_state_helper node](ur_robot_driver/doc/ROS_INTERFACE.md#robot_state_helper) for details.
- * Use **on-the-robot interpolation** for both Cartesian and
-   joint-based trajectories. This is extremely helpful if your application can
-   not meet the real-time requirements of the driver. Special types of
-   [passthrough
-   controllers](https://github.com/fzi-forschungszentrum-informatik/cartesian_ros_control/tree/beta-testing/pass_through_controllers)
-   forward the trajectories directly to the robot, which then takes
-   care of interpolation between the waypoints to achieve best performance.
 
 Please see the external [feature list](ur_robot_driver/doc/features.md) for a listing of all features supported by this driver.
 
@@ -88,37 +79,19 @@ This repository contains the new **ur_robot_driver** and a couple of helper pack
     commands sent from ROS.
   * **ur_calibration**: Package around extracting and converting a robot's factory calibration
     information to make it usable by the robot_description.
+  * **ur_controllers**: Controllers introduced with this driver, such as speed-scaling-aware
+    controllers.
   * **ur_robot_driver**: The actual driver package.
 
 ## Requirements
 This driver requires a system setup with ROS. It is recommended to use **Ubuntu 18.04 with ROS
-melodic**, however using Ubuntu 20.04 with ROS noetic should also work.
+melodic**, however using Ubuntu 16.04 with ROS kinetic should also work.
 
 To make sure that robot control isn't affected by system latencies, it is highly recommended to use
 a real-time kernel with the system. See the [real-time setup guide](ur_robot_driver/doc/real_time.md)
 on information how to set this up.
 
-## Preliminary UR16e support
-This driver supports all UR variants including the UR16e. However, upstream support for the UR16e is
-not finished, yet. When using the UR16e there is currently no support for gazebo or MoveIt!.
-
-See [#97](https://github.com/UniversalRobots/Universal_Robots_ROS_Driver/pull/97) for details on
-using the latest upstream develop branch of
-[ros_industrial/universal_robot](https://github.com/ros-industrial/universal_robot) which includes
-gazebo support for the ur16e, but no working MoveIt! support at the time of writing.
-
 ## Building
-
-**Note:** The driver consists of a [C++
-library](https://github.com/UniversalRobots/Universal_Robots_Client_Library) that abstracts the
-robot's interfaces and a ROS driver on top of that. As the library can be built without ROS support,
-it is not a catkin package and therefore requires a different treatment when being built inside the
-workspace. See The alternative build method below if you'd like to build the library from source.
-
-If you don't want to build the library from source, it is available as a binary package through the
-ROS distribution of ROS melodic and noetic. It will be installed automatically if you
-follow the steps below. If you'd like to also build the library from source, please follow the steps
-explained in the [next section](#alternative-all-source-build).
 
 ```bash
 # source global ros
@@ -130,7 +103,7 @@ $ mkdir -p catkin_ws/src && cd catkin_ws
 # clone the driver
 $ git clone https://github.com/UniversalRobots/Universal_Robots_ROS_Driver.git src/Universal_Robots_ROS_Driver
 
-# clone fork of the description. This is currently necessary, until the changes are merged upstream.
+# clone fork of the description to use the calibration feature
 $ git clone -b calibration_devel https://github.com/fmauch/universal_robot.git src/fmauch_universal_robot
 
 # install dependencies
@@ -145,28 +118,10 @@ $ catkin_make
 $ source devel/setup.bash
 ```
 
-### Alternative: All-source build
-If you would like to also build the library from source, clone the library into your workspace, as
-well and build it using either `catkin_make_isolated` or [`catkin
-build`](https://catkin-tools.readthedocs.io/en/latest/verbs/catkin_build.html).
-
-```bash
-$ source /opt/ros/<your_ros_version>/setup.bash
-$ mkdir -p catkin_ws/src && cd catkin_ws
-$ git clone -b boost https://github.com/UniversalRobots/Universal_Robots_Client_Library.git src/Universal_Robots_Client_Library
-$ git clone https://github.com/UniversalRobots/Universal_Robots_ROS_Driver.git src/Universal_Robots_ROS_Driver
-$ git clone -b calibration_devel https://github.com/fmauch/universal_robot.git src/fmauch_universal_robot
-$ sudo apt update -qq
-$ rosdep update
-$ rosdep install --from-paths src --ignore-src -y
-$ catkin_make_isolated
-$ source devel_isolated/setup.bash
-```
-
 ## Setting up a UR robot for ur_robot_driver
 ### Prepare the robot
 For using the *ur_robot_driver* with a real robot you need to install the
-**externalcontrol-1.0.4.urcap** which can be found inside the **resources** folder of this driver.
+**externalcontrol-1.0.urcap** which can be found inside the **resources** folder of this driver.
 
 **Note**: For installing this URCap a minimal PolyScope version of 3.7 or 5.1 (in case of e-Series) is
 necessary.
@@ -211,7 +166,7 @@ To actually start the robot driver use one of the existing launch files
 
     $ roslaunch ur_robot_driver <robot_type>_bringup.launch robot_ip:=192.168.56.101
 
-where **<robot_type>** is one of *ur3, ur5, ur10, ur3e, ur5e, ur10e, ur16e*. Note that in this example we
+where **<robot_type>** is one of *ur3, ur5, ur10, ur3e, ur5e, ur10e*. Note that in this example we
 load the calibration parameters for the robot "ur10_example".
 
 If you calibrated your robot before, pass that calibration to the launch file:
@@ -226,8 +181,8 @@ For more information on the launch file's parameters see its own documentation.
 
 Once the robot driver is started, load the [previously generated program](#prepare-the-robot) on the
 robot panel that will start the *External Control* program node and execute it. From that moment on
-the robot is fully functional. You can make use of the *Pause* function or even *Stop* (:stop_button:) the
-program.  Simply press the *Play* button (:arrow_forward:) again and the ROS driver will reconnect.
+the robot is fully functional. You can make use of the *Pause* function or even *Stop* (◾) the
+program.  Simply press the *Play* button (▶) again and the ROS driver will reconnect.
 
 Inside the ROS terminal running the driver you should see the output `Robot ready to receive control commands.`
 
@@ -235,7 +190,7 @@ Inside the ROS terminal running the driver you should see the output `Robot read
 To control the robot using ROS, use the action server on
 
 ```bash
-/scaled_pos_joint_traj_controller/follow_joint_trajectory
+/scaled_pos_traj_controller/follow_joint_trajectory
 ```
 
 Use this with any client interface such as [MoveIt!](https://moveit.ros.org/) or simply the
@@ -244,31 +199,6 @@ Use this with any client interface such as [MoveIt!](https://moveit.ros.org/) or
 ```
 rosrun rqt_joint_trajectory_controller rqt_joint_trajectory_controller
 ```
-
-You may need to install rqt_joint_trajectory_controller by running: 
-```
-sudo apt install ros-<ROS-DISTRO>-rqt-joint-trajectory-controller
-```
-where ROS-DISTRO will be replaced with your version of ROS.
-
-For a more elaborate tutorial on how to get started, please see the
-[usage example](ur_robot_driver/doc/usage_example.md).
-
-### Replacing the robot description
-
-In a real-world scenario you will want to replace the robot description with a description
-containing the whole scene where the robot is acting in. For this, all the bringup launchfiles offer
-the argument `robot_description_file` that should point to a launchfile loading the robot
-description.
-
-While the `load_urXXX.launch` files from the [ur_description](http://wiki.ros.org/ur_description)
-package contain a lot of arguments to change the robot model, this driver only forwards the
-`kinematics_config` parameter file. For further adaption please create your own `load_urXXX.launch`
-file that fits your application and pass this to the `urXXX_bringup.launch` files from this package.
-
-If you prefer decoupling loading the robot description and starting the driver, you can start the
-`ur_control.launch` launchfile directly after the `robot_description` has been uploaded to the
-parameter server.
 
 ## Troubleshooting
 
@@ -300,10 +230,6 @@ Make sure, the IP address setup is correct, as described in the setup guides ([C
 **Note:** This error can also show up, when the ROS driver is not running.
 
 ### When starting the program on the TP, I get a `C207A0` error.
-**Note:** With the current driver version this issue can only happen when the fieldbus is enabled
-*after* the ROS driver has been started. Otherwise you will run into [#204](../../issues/204) when starting the driver
-with an enabled EtherNet/IP fieldbus.
-
 Most probably, the EtherNet/IP fieldbus is enabled in the robot's installation. If your setup includes an
 Ethernet/IP fieldbus (note: EtherNet/IP != ethernet), make sure that it is
 connected properly. In the Ethernet/IP fieldbus Installation screen
@@ -315,56 +241,8 @@ to the fieldbus scanner can be established (note: This is only to get the
 the fieldbus scanner can indeed be made). If you don't use EtherNet/IP
 fieldbusses at all, you can disable it in the same installation screen. 
 
-### When starting the driver, it crashes with `Variable 'speed_slider_mask' is currently controlled by another RTDE client`
-Probably, you are running into [#204](../../issues/204). Currently, this driver cannot be used together with an enabled
-EtherNet/IP fieldbus. Disable EtherNet/IP to workaround this error. [#204](../../issues/204) contains a guide how to do
-this.
-
-
 ### I cannot get a realtime kernel running together with an NVIDIA graphics card
 This is a known issue and unfortunately we don't have a solution for this. The Nvidia kernel module
 seems to not compile with every kernel. We recommend to use a multi-machine ROS setup in this
 situation where a realtime-system is running the robot driver and a separate machine is performing
 the computations requiring the graphics card.
-
-### Why can't the driver use the extracted calibration info on startup?
-This is mainly because parameters are loaded onto the parameter server before any nodes are started.
-
-The `robot_description` concept inside ROS is not designed to be changed while a system is running.
-Consumers of the urdf/`robot_description` (in terms of other ROS nodes) will not update the model
-they have been loading initially. While technically the `robot_description` parameter could be altered during runtime
-and any node that is started *afterwards* would see the updated model, this would lead to an inconsistent
-application state (as some nodes will use the old model, while others use the updated one). In other words: It's not the driver that needs/benefits from this calibrated urdf, it's the rest of the ROS application and that will only see it *if* the calibrated version is present on the parameter server *before* nodes are started.
-
-Additionally: If the calibration stored on the ROS side doesn't match the one of the robot controller, there's a good chance there is a reason for this and it
-would be better to make updating it a conscious decision by a human (as the driver would not know *when* updating the model would be convenient or safe). Having to run the calibration
-extraction/transformation as a separate step makes this possible and doesn't hide this step from the
-end user.
-
-### Can this driver be used inside a combined hardware interface?
-Yes, this is possible. However, if used inside a [combined HW
-interface](http://wiki.ros.org/combined_robot_hw) we recommend to enable [non-blocking read
-functinality](https://github.com/UniversalRobots/Universal_Robots_ROS_Driver/blob/master/ur_robot_driver/doc/ROS_INTERFACE.md#non_blocking_read-default-false).
-
-### I sent raw script code to the robot but it is not executed
-On the e-Series the robot has to be in [remote control
-mode](ur-robot-driver/README.md#remote-control-mode) to accept script code from an external source.
-This has to be switched from the Teach-Pendant.
-
-### Using the dashboard doesn't work
-On the e-Series the robot has to be in [remote control
-mode](ur-robot-driver/README.md#remote-control-mode) to accept certain calls on the dashboard server.
-See [Available dashboard
-commands](https://www.universal-robots.com/articles/ur-articles/dashboard-server-cb-series-port-29999/)
-for details.
-
-### Passthrough controllers: The robot does not fully reach trajectory points even though I have specified the path tolerance to be 0
-If you are using a control modes that forwards trajectories to the robot, currently the path tolerance is ignored. The corresponding interface on the robot and client-library level exists in the form of a "blend radius", but is not utilized by this ROS driver. For more information see this [issue](https://github.com/UniversalRobots/Universal_Robots_ROS_Driver/issues/352).
-
-### Can I use the Cartesian controllers together with MoveIt!?
-Not directly, no. MoveIt! plans a Cartesian path and then creates a joint trajectory out of that for
-execution, as the common interface to robot drivers in ROS is the
-[FollowJointTrajectory](http://docs.ros.org/en/noetic/api/control_msgs/html/action/FollowJointTrajectory.html)
-action.
-
-For supporting Cartesian controllers inside MoveIt! changes would have to be made to MoveIt! itself.
